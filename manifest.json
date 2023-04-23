@@ -9,8 +9,8 @@
     "content_scripts": [
         {
             "js": [
-                "src/typeListener.js",
-                "src/index.js"
+                "src/content/typeListener.js",
+                "src/content/index.js"
             ],
             "matches": [
                 "file:///*/test/index.html"
