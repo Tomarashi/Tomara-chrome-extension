@@ -9,6 +9,7 @@
     "content_scripts": [
         {
             "js": [
+                "src/typeListener.js",
                 "src/index.js"
             ],
             "matches": [
