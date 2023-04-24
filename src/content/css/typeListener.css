@@ -1,0 +1,33 @@
+/*
+ClassName Format: 
+    .sityvis-tomara-extension-<prefix of class name>
+*/
+
+.sityvis-tomara-extension-suggestions-box {
+    position: absolute;
+    background-color: #111;
+    color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px #585858;
+    display: block;
+    font-size: 12px;
+    padding: 4px 6px;
+    position: absolute;
+    transform: translate(5%, -70%);
+    transition: top 0.1s ease 0s, left 0.1s ease 0s;
+    white-space: nowrap;
+    width: auto;
+    z-index: 9999;
+}
+
+.sityvis-tomara-extension-suggestions-box:after {
+    background-color: #111;
+    content: '';
+    height: 10px;
+    position: absolute;
+    width: 15px;
+    bottom: 0;
+    left: 0;
+    transform: translate(-10%, 10%) rotate(-15deg) skewX(-40deg);
+    z-index: -1;
+}

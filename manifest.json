@@ -8,6 +8,9 @@
     },
     "content_scripts": [
         {
+            "css": [
+                "src/content/css/typeListener.css"
+            ],
             "js": [
                 "src/content/typeListener.js",
                 "src/content/index.js"
