@@ -10,9 +10,8 @@ const loadTextInputs = function() {
 
 const main = function() {
     const textInputs = loadTextInputs();
-    const typeListener = new TypeListener();
     textInputs.forEach((component) => {
-        typeListener.addListenable(component);
+        console.log(component);
     });
 };
 

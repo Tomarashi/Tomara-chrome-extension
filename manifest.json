@@ -1,23 +1,19 @@
 {
-    "manifest_version": 3,
-    "name": "Tomara's Extension",
-    "version": "1.0.0",
-    "description": "Chrome Extension for Tomara",
-    "icons": {
-        "32": "images/icons/icon-32.ico"
-    },
-    "content_scripts": [
-        {
-            "css": [
-                "src/content/css/typeListener.css"
-            ],
-            "js": [
-                "src/content/typeListener.js",
-                "src/content/index.js"
-            ],
-            "matches": [
-                "file:///*/test/index.html"
-            ]
-        }
-    ]
+  "manifest_version": 3,
+  "name": "Tomara's Extension",
+  "version": "1.0.0",
+  "description": "Chrome Extension for Tomara",
+  "icons": {
+    "32": "images/icons/icon-32.ico"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "dist/content/index.js"
+      ],
+      "matches": [
+        "file:///*/test/index.html"
+      ]
+    }
+  ]
 }
