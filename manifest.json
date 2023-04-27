@@ -21,6 +21,9 @@
       "matches": ["<all_urls>"],
       "resources": [
         "dist/content/index.js",
+        "dist/content/controllers/input-controller.js",
+        "dist/content/ui/suggestions-box.js",
+        "dist/content/utils/classes.js",
         "dist/content/utils/dom-functions.js",
         "dist/content/wrapper/exceptions.js",
         "dist/content/wrapper/functions.js",

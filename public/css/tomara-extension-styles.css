@@ -1,3 +1,17 @@
-html, body {
-    background: red;
+.tomara-extension-suggestion-box {
+    position: absolute;
+    background-color: #9A0000;
+    width: 50px;
+    height: 50px;
+    z-index: 999999999;
+}
+
+.tomara-extension-suggestion-box-visible {
+    visibility: visible;
+    display: block;
+}
+
+.tomara-extension-suggestion-box-hidden {
+    visibility: hidden;
+    display: none;
 }

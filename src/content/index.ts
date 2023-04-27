@@ -1,5 +1,5 @@
+import { setUpController } from "./controllers/input-controller.js";
 import { loadDomComponents } from "./utils/dom-functions.js";
-import { createDomElementWrapper } from "./wrapper/functions.js"
 
 const main = function() {
     const selectors = [
@@ -7,10 +7,10 @@ const main = function() {
         "input[type='text']",
         "div[contenteditable='true']",
     ];
-    const textInputs = loadDomComponents(...selectors);
-    textInputs.forEach((component) => {
-        createDomElementWrapper(component as HTMLElement);
+    const textInputElements = loadDomComponents(...selectors).map(elemenet => {
+        return elemenet as HTMLElement;
     });
+    setUpController(textInputElements);
 };
 
 (function() {
