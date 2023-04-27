@@ -26,6 +26,12 @@
         "dist/content/wrapper/functions.js",
         "dist/content/wrapper/wrappers.js"
       ]
+    },
+    {
+      "matches": ["<all_urls>"],
+      "resources": [
+        "public/css/tomara-extension-styles.css"
+      ]
     }
   ]
 }
