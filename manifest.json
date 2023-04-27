@@ -9,10 +9,22 @@
   "content_scripts": [
     {
       "js": [
-        "dist/content/index.js"
+        "entry/loader.js"
       ],
       "matches": [
         "file:///*/test/index.html"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": ["<all_urls>"],
+      "resources": [
+        "dist/content/index.js",
+        "dist/content/utils/dom-functions.js",
+        "dist/content/wrapper/exceptions.js",
+        "dist/content/wrapper/functions.js",
+        "dist/content/wrapper/wrappers.js"
       ]
     }
   ]

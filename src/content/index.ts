@@ -1,17 +1,15 @@
-const loadTextInputs = function() {
-    return [
+import { loadDomComponents } from "./utils/dom-functions.js";
+import { createDomElementWrapper } from "./wrapper/functions.js"
+
+const main = function() {
+    const selectors = [
         "textarea",
         "input[type='text']",
         "div[contenteditable='true']",
-    ].map((inputSelector) => {
-        return Array.from(document.querySelectorAll(inputSelector));
-    }).flat();
-};
-
-const main = function() {
-    const textInputs = loadTextInputs();
+    ];
+    const textInputs = loadDomComponents(...selectors);
     textInputs.forEach((component) => {
-        console.log(component);
+        createDomElementWrapper(component as HTMLElement);
     });
 };
 

@@ -2,11 +2,6 @@
   "name": "tomara-chrome-extension",
   "version": "1.0.0",
   "description": "Tomara's chrome extension",
-  "main": "index.js",
-  "directories": {
-    "example": "example",
-    "test": "test"
-  },
   "scripts": {
     "build": "tsc"
   },
