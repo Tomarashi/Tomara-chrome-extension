@@ -20,12 +20,15 @@
     {
       "matches": ["<all_urls>"],
       "resources": [
+        "dist/content/config.js",
         "dist/content/index.js",
+        "dist/content/api/requester.js",
         "dist/content/controllers/input-controller.js",
         "dist/content/ui/suggestions-box.js",
         "dist/content/ui/suggestions-container.js",
         "dist/content/utils/classes.js",
         "dist/content/utils/dom-functions.js",
+        "dist/content/utils/keyboard-functions.js",
         "dist/content/utils/string-functions.js",
         "dist/content/wrapper/exceptions.js",
         "dist/content/wrapper/functions.js",

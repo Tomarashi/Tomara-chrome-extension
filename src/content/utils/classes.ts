@@ -36,7 +36,9 @@ class Coordinate {
     readonly x: number;
     readonly y: number;
 
-    constructor(x: number, y: number) {
+    constructor(x: number = undefined, y: number = undefined) {
+        if(!x) x = 0;
+        if(!y) y = x;
         this.x = x;
         this.y = y;
     }
