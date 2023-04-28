@@ -1,8 +1,10 @@
 # Tomara-chrome-extension
 Tomara's Extension
 
-#### Helper projects:
-- [Written with this example](https://codepen.io/jh3y/pen/rpoxxL)
+To compile project run:
+```sh
+npm run build
+```
 
 #### Small Instruction
 Initialization of this extension starts with `entry/loader.js`. It loads resources that are written in `manifest.json` and appends them into html.
