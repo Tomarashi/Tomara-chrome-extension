@@ -10,7 +10,19 @@ const copyStyles = (src: HTMLElement, dest: HTMLElement) => {
     });
 };
 
+const getHead = (): HTMLHeadElement => {
+    return document.head
+        || document.getElementsByTagName("head")[0] as HTMLHeadElement;
+};
+
+const getBody = (): HTMLBodyElement => {
+    return document.body as HTMLBodyElement
+        || document.getElementsByTagName("body")[0] as HTMLBodyElement;
+};
+
 export {
     loadDomComponents,
     copyStyles,
+    getHead,
+    getBody,
 };

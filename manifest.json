@@ -27,6 +27,7 @@
         "dist/content/ui/suggestions-box.js",
         "dist/content/ui/suggestions-container.js",
         "dist/content/utils/classes.js",
+        "dist/content/utils/const.js",
         "dist/content/utils/dom-functions.js",
         "dist/content/utils/keyboard-functions.js",
         "dist/content/utils/string-functions.js",

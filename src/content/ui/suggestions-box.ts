@@ -1,4 +1,5 @@
 import { Coordinate } from "../utils/classes.js";
+import { getBody } from "../utils/dom-functions.js";
 import {
     ISuggestionsContainer,
     ISuggestionsContainerListener,
@@ -26,7 +27,7 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
         this.root = document.createElement("div");
         this.setCoordinates(new Coordinate(0, 0));
         this.root.setAttribute("class", DefaultSuggestionsBox.MAIN_CLASS_NAME);
-        const parent = document.body || document.getElementsByTagName("body")[0];
+        const parent = getBody();
         parent.insertBefore(this.root, parent.lastChild);
         this._isShown = true;
         this.hide();
@@ -65,7 +66,6 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
 
     updatedContainer(container: ISuggestionsContainer): void {
         const values = container.getValues();
-        console.log(values);
     }
 };
 
