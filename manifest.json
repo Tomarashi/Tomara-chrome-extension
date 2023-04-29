@@ -39,7 +39,8 @@
     {
       "matches": ["<all_urls>"],
       "resources": [
-        "public/css/tomara-extension-styles.css"
+        "public/css/tomara-extension-styles.css",
+        "public/fonts/bpg_arial_2009.ttf"
       ]
     }
   ]
