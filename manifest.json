@@ -9,7 +9,7 @@
   "content_scripts": [
     {
       "js": [
-        "entry/loader.js"
+        "src/entry.js"
       ],
       "matches": [
         "file:///*/test/index.html"
