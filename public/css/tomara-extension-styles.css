@@ -1,10 +1,42 @@
+@font-face {
+    font-family: 'bpg-arial';
+    src: URL('../fonts/bpg_arial_2009.ttf') format('truetype');
+}
+
 .tomara-extension-suggestion-box {
     position: absolute;
-    border: 2px solid #9A0000;
-    box-sizing: border-box;
-    width: 50px;
-    height: 50px;
+    border-radius: 3px;
+    border: 1px solid #9A0000;
+    box-shadow: 1;
+    background-color: white;
+    min-width: 80px;
+    min-height: 5px;
+    max-height: 120px;
+    height: fit-content;
+    overflow: hidden;
+    overflow-y: scroll;
     z-index: 999999999;
+    box-shadow: rgba(0, 0, 0, 0.3) 4px 4px 5px;
+    font-family: bpg-arial;
+    font-weight: bold;
+}
+
+.tomara-extension-suggestion-box::-webkit-scrollbar {
+    width: 10px;
+}
+
+.tomara-extension-suggestion-box::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.tomara-extension-suggestion-box::-webkit-scrollbar-thumb {
+    background: #9A0000;
+    border-radius: 4px;
+    opacity: 0.6;
+}
+
+.tomara-extension-suggestion-box::-webkit-scrollbar-thumb:hover {
+    opacity: 0.8;
 }
 
 .tomara-extension-suggestion-box-visible {
@@ -15,4 +47,31 @@
 .tomara-extension-suggestion-box-hidden {
     visibility: hidden;
     display: none;
+}
+
+.tomara-extension-suggestion-box-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tomara-extension-suggestion-box-list-item {
+    margin: 0;
+    padding: 6px 9px;
+    background-color: white;
+    color: #9A0000;
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+.tomara-extension-suggestion-box-list-item:hover {
+    background-color: #9A0000;
+    color: white;
+    opacity: 0.6;
+}
+
+.tomara-extension-suggestion-box-list-item-chosen {
+    background-color: #9A0000;
+    color: white;
+    opacity: 0.8;
 }
