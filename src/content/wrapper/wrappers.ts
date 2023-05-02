@@ -3,30 +3,46 @@ import {
     copyStyles,
     getBody,
 } from "../utils/dom-functions.js";
+import { WrapperManager } from "./wrapper-manager";
 
 interface IDomElementWrapper {
+    getWrapped(): HTMLElement
     getValue(): string
+    setValue(newValue: string): void
     getCursorCoordinates(): Coordinate
     getCursurPosition(event: Event): number
-    on(eventType: string, listener: EventListenerOrEventListenerObject): void
+    on(eventType: string | string[], listener: EventListenerOrEventListenerObject): void
 };
 
 abstract class AbstractDomElementWrapper<T extends HTMLElement> implements IDomElementWrapper {
     protected events: Map<string, EventListenerOrEventListenerObject[]>;
     protected domElement: T;
+    protected wrapperManager: WrapperManager;
 
-    constructor(domElement: T) {
+    constructor(domElement: T, wrapperManager: WrapperManager = null) {
         this.events = new Map();
         this.domElement = domElement;
+        this.wrapperManager = wrapperManager;
+    }
+
+    getWrapped(): HTMLElement {
+        return this.domElement;
     }
 
     abstract getValue(): string
+
+    abstract setValue(newValue: string): void
 
     abstract getCursorCoordinates(): Coordinate
 
     abstract getCursurPosition(event: Event): number
 
-    on(eventType: string, listener: EventListenerOrEventListenerObject): void {
+    on(eventType: string | string[], listener: EventListenerOrEventListenerObject): void {
+        if(Array.isArray(eventType)) {
+            return eventType.forEach(eType => {
+                this.on(eType, listener);
+            });
+        }
         this.domElement.addEventListener(eventType, listener);
         if(!this.events.has(eventType)) {
             this.events.set(eventType, []);
@@ -39,6 +55,15 @@ class DivWrapper extends AbstractDomElementWrapper<HTMLDivElement> {
     getValue(): string {
         const element = this.domElement;
         return (element.textContent || element.innerHTML).replace(/ +/g," ");
+    }
+
+    setValue(newValue: string): void {
+        const element = this.domElement;
+        if(element.textContent) {
+            element.textContent = newValue;
+        } else if(element.innerHTML) {
+            element.innerHTML = newValue;
+        }
     }
 
     getCursorCoordinates(): Coordinate {
@@ -60,6 +85,10 @@ class DivWrapper extends AbstractDomElementWrapper<HTMLDivElement> {
 class InputWrapper extends AbstractDomElementWrapper<HTMLInputElement> {
     getValue(): string {
         return this.domElement.value;
+    }
+
+    setValue(newValue: string): void {
+        this.domElement.value = newValue;
     }
 
     getCursorCoordinates(): Coordinate {
@@ -104,6 +133,10 @@ class TextareaWrapper extends AbstractDomElementWrapper<HTMLTextAreaElement> {
         return this.domElement.value || "";
     }
 
+    setValue(newValue: string): void {
+        this.domElement.value = newValue;
+    }
+
     getCursorCoordinates(): Coordinate {
         const getLineHeightInPixels = (element: HTMLTextAreaElement): number => {
             const styles = getComputedStyle(element);
@@ -112,7 +145,7 @@ class TextareaWrapper extends AbstractDomElementWrapper<HTMLTextAreaElement> {
                 const span = document.createElement("span");
                 span.style.fontSize = styles.fontSize;
                 span.style.fontFamily = styles.fontFamily;
-                span.textContent = "M";
+                span.textContent = "T";
                 element.parentNode.appendChild(span);
                 const normalHeight = span.offsetHeight;
                 element.parentNode.removeChild(span);

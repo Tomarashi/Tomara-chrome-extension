@@ -1,16 +1,18 @@
-import { FakeRequester } from "../api/requester.js";
-import { DefaultSuggestionsBox } from "../ui/suggestions-box.js";
-import { DefaultSuggestionsContainer } from "../ui/suggestions-container.js";
-import { isArrowKey } from "../utils/keyboard-functions.js";
+import { IRequester, FakeRequester } from "../api/requester.js";
+import { ISuggestionsBox, DefaultSuggestionsBox } from "../ui/suggestions-box.js";
+import { ISuggestionsContainer, DefaultSuggestionsContainer } from "../ui/suggestions-container.js";
+import { isLeftRightArrowKey, isUpDownArrowKey } from "../utils/keyboard-functions.js";
 import { splitString } from "../utils/string-functions.js";
 import { createDomElementWrapper } from "../wrapper/functions.js";
+import { WrapperManager } from "../wrapper/wrapper-manager.js";
 
 const setUpController = (elements: HTMLElement[]) => {
     const elementsSet = new Set(elements);
 
-    const container = new DefaultSuggestionsContainer();
-    const box = new DefaultSuggestionsBox(container);
-    const requester = new FakeRequester();
+    const container: ISuggestionsContainer = new DefaultSuggestionsContainer();
+    const wrapperManager = new WrapperManager();
+    const box: ISuggestionsBox = new DefaultSuggestionsBox(container, wrapperManager);
+    const requester: IRequester = new FakeRequester();
 
     elements.forEach((component) => {
         const wrapper = createDomElementWrapper(component);
@@ -20,7 +22,7 @@ const setUpController = (elements: HTMLElement[]) => {
                 const newTarget = newEvent.target;
                 if(srcEvent !== newEvent
                 && newTarget !== srcEvent.target
-                && newTarget !== box.asHTMLElement()
+                && !box.isThisElement(newTarget)
                 && !elementsSet.has(newTarget)) {
                     toggleSuggestionsBox();
                 }
@@ -37,6 +39,8 @@ const setUpController = (elements: HTMLElement[]) => {
                 }
             };
 
+            wrapperManager.setFocused(wrapper);
+
             if(!box.isShown()) {
                 toggleSuggestionsBox();
             }
@@ -50,15 +54,29 @@ const setUpController = (elements: HTMLElement[]) => {
                 container.clear();
             } else {
                 container.updateValues(
-                    ...requester.getWordsStartsWith(lastSubstring),
+                    ...requester.getWordsStartsWith(lastSubstring, undefined),
                 );
             }
+
+            (() => {
+                if(lastSubstring === "") {
+                    return;
+                }
+                box.registerForUserChoice(component, (choice) => {
+                    const value = wrapper.getValue();
+                    const newVal = value.substring(0, cursorPos) +
+                        choice.substring(lastSubstring.length) +
+                        value.substring(cursorPos);
+                    console.log(newVal);
+                });
+            })();
         };
 
         wrapper.on("input", inputOrClickEvent);
         wrapper.on("click", inputOrClickEvent);
-        wrapper.on("keyup", (keyEvent: any) => {
-            if(isArrowKey(keyEvent.keyCode)) {
+        wrapper.on("keyup", (keyEvent: KeyboardEvent) => {
+            const keyCode = keyEvent.keyCode;
+            if(isLeftRightArrowKey(keyCode) || (!keyEvent.ctrlKey && isUpDownArrowKey(keyCode))) {
                 inputOrClickEvent(keyEvent);
             }
         });

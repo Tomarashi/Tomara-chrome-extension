@@ -33,6 +33,7 @@
         "dist/content/utils/string-functions.js",
         "dist/content/wrapper/exceptions.js",
         "dist/content/wrapper/functions.js",
+        "dist/content/wrapper/wrapper-manager.js",
         "dist/content/wrapper/wrappers.js"
       ]
     },
