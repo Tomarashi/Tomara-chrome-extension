@@ -10,6 +10,8 @@ import { WrapperManager } from "../wrapper/wrapper-manager.js";
 import {
     ISuggestionsContainer,
     ISuggestionsContainerListener,
+    EmptyInputResultSet,
+    ResultSet,
 } from "./suggestions-container.js";
 
 interface ISuggestionsBox {
@@ -29,9 +31,14 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
     private static readonly MAIN_CLASS_NAME = "tomara-extension-suggestion-box";
     private static readonly SHOW_CLASS_NAME = "tomara-extension-suggestion-box-visible";
     private static readonly HIDE_CLASS_NAME = "tomara-extension-suggestion-box-hidden";
+    private static readonly MAIN_INFO_TAG_CLASS_NAME = "tomara-extension-suggestion-box-info-tag";
+    private static readonly MAIN_INFO_TAG_VISIBLE_CLASS_NAME = "tomara-extension-suggestion-box-info-tag-visible";
     private static readonly MAIN_LIST_CLASS_NAME = "tomara-extension-suggestion-box-list";
     private static readonly MAIN_LIST_ITEM_CLASS_NAME = "tomara-extension-suggestion-box-list-item";
     private static readonly MAIN_LIST_ITEM_CHOSEN_CLASS_NAME = "tomara-extension-suggestion-box-list-item-chosen";
+
+    private static readonly INFO_TAG_TEXT_START_TYPE = "დაიწყე აკრიფე...";
+    private static readonly INFO_TAG_TEXT_NO_RESULT = "შედეგი ვერ მოიძებნა ;(";
 
     static UIListHolder = class UIListHolder {
         readonly owner: DefaultSuggestionsBox;
@@ -57,7 +64,7 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
                 const item = document.createElement("li");
                 item.innerHTML = value;
                 item.setAttribute("class", DefaultSuggestionsBox.MAIN_LIST_ITEM_CLASS_NAME);
-                item.addEventListener("click", (_: PointerEvent) => {
+                item.addEventListener("click", (pointerEvent: PointerEvent) => {
                     const owner = this.owner;
                     const wrapper = owner.wrapperManager.getFocused();
                     const func = owner.userChoiseEventsMap.get(wrapper.getWrapped());
@@ -67,17 +74,23 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
                 });
                 return item;
             }
+
             this.items = [];
-            this.values = [...values];
-            values.map(buildItem).forEach(element => {
-                this.list.appendChild(element);
-                this.items.push(element);
-            });
-            this.currIndex = 0;
-            this.chooseOffset(0);
+            if(values.length === 0) {
+                this.currIndex = -1;
+            } else {
+                this.clear();
+                this.values = [...values];
+                values.map(buildItem).forEach(element => {
+                    this.list.appendChild(element);
+                    this.items.push(element);
+                });
+                this.currIndex = 0;
+                this.chooseOffset(0);
+            }
         }
 
-        private indexInRange(index: number): boolean {
+        indexInRange(index: number): boolean {
             return 0 <= index && index < this.values.length;
         }
 
@@ -111,6 +124,7 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
     private suggestionsContainer: ISuggestionsContainer;
     private wrapperManager: WrapperManager;
     private root: HTMLDivElement;
+    private infoTag: HTMLParagraphElement;
     private listHolder: DefaultSuggestionsBox.UIListHolder;
     private userChoiseEventsMap: Map<HTMLElement, (_: string) => void>;
     private _isShown: boolean;
@@ -129,6 +143,16 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
             root.appendChild(this.listHolder.list);
             return root;
         })();
+        this.infoTag = (() => {
+            const info = document.createElement("p");
+            info.innerHTML = DefaultSuggestionsBox.INFO_TAG_TEXT_START_TYPE;
+            info.classList.add(
+                DefaultSuggestionsBox.MAIN_INFO_TAG_CLASS_NAME,
+                DefaultSuggestionsBox.MAIN_INFO_TAG_VISIBLE_CLASS_NAME,
+            );
+            return info;
+        })();
+        this.root.appendChild(this.infoTag);
         this.userChoiseEventsMap = new Map();
         this.setCoordinates(BAD_COORDINATE);
         const parent = getBody();
@@ -140,12 +164,12 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
             if(keyCode === TAB_KEY_CODE) {
                 const wrapper = this.wrapperManager.getFocused();
                 const func = this.userChoiseEventsMap.get(wrapper.getWrapped());
-                if(func) {
+                const chosenValue = this.getChosenValue();
+                if(func && chosenValue) {
                     func(this.getChosenValue());
                 }
                 keyEvent.preventDefault();
-            }
-            if(keyEvent.ctrlKey && isUpDownArrowKey(keyCode)) {
+            } else if(keyEvent.ctrlKey && isUpDownArrowKey(keyCode)) {
                 const offset = (keyCode == UP_ARROW_KEY_CODE)? -1: 1;
                 this.listHolder.chooseOffset(offset);
                 keyEvent.preventDefault();
@@ -159,7 +183,7 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
     }
 
     setCoordinates(coordiante: Coordinate): void {
-        coordiante = coordiante.offset(10, 0);
+        coordiante = coordiante.offset(20, 40);
         const pos = `left: ${coordiante.x}px; top: ${coordiante.y}px;`
         this.root.setAttribute("style", pos);
     }
@@ -188,6 +212,7 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
 
     isThisElement(element: HTMLElement): boolean {
         return this.root === element
+            || this.infoTag === element
             || this.listHolder.items.some(item => item === element);
     }
 
@@ -199,9 +224,21 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
         this.userChoiseEventsMap.set(element, invoker);
     }
 
-    updatedContainer(container: ISuggestionsContainer): void {
+    updatedContainer(resultSet: ResultSet): void {
+        const classList = this.infoTag.classList;
         this.listHolder.clear();
-        this.listHolder.showValues(container.getValues());
+        if(resultSet instanceof EmptyInputResultSet) {
+            classList.add(DefaultSuggestionsBox.MAIN_INFO_TAG_VISIBLE_CLASS_NAME);
+            this.infoTag.innerHTML = DefaultSuggestionsBox.INFO_TAG_TEXT_START_TYPE;
+        } else {
+            this.listHolder.showValues(resultSet.values);
+            this.infoTag.innerHTML = DefaultSuggestionsBox.INFO_TAG_TEXT_NO_RESULT;
+            if(resultSet.values.length === 0) {
+                classList.add(DefaultSuggestionsBox.MAIN_INFO_TAG_VISIBLE_CLASS_NAME);
+            } else {
+                classList.remove(DefaultSuggestionsBox.MAIN_INFO_TAG_VISIBLE_CLASS_NAME);
+            }
+        }
     }
 };
 

@@ -1,3 +1,18 @@
+class ResultSet {
+    readonly values: string[]
+
+    constructor(values: string[]) {
+        this.values = values;
+    }
+};
+
+class EmptyInputResultSet extends ResultSet {
+    constructor() {
+        super(undefined);
+    }
+};
+
+
 interface ISuggestionsContainer {
     addListener(listener: ISuggestionsContainerListener): boolean
     removeListener(listener: ISuggestionsContainerListener): boolean
@@ -8,17 +23,19 @@ interface ISuggestionsContainer {
 };
 
 interface ISuggestionsContainerListener {
-    updatedContainer(container: ISuggestionsContainer): void
+    updatedContainer(resultSet: ResultSet): void
 };
 
 
 class DefaultSuggestionsContainer implements ISuggestionsContainer {
     private listeners: Set<ISuggestionsContainerListener>;
     private values: string[];
+    private valuesWereCleaned: boolean;
 
     constructor() {
         this.listeners = new Set();
         this.values = [];
+        this.valuesWereCleaned = true;
     }
 
     addListener(listener: ISuggestionsContainerListener): boolean {
@@ -38,30 +55,38 @@ class DefaultSuggestionsContainer implements ISuggestionsContainer {
     }
 
     private notifyListeners(): void {
+        const resultSet = (this.valuesWereCleaned)?
+            new EmptyInputResultSet():
+            new ResultSet(this.values);
         this.listeners.forEach((listener) => {
-            listener.updatedContainer(this);
+            listener.updatedContainer(resultSet);
         });
     }
 
     addValues(...values: string[]): void {
         this.values.push(...values);
+        this.valuesWereCleaned = false;
         this.notifyListeners();
     }
 
     updateValues(...values: string[]): void {
         this.values = [];
         this.values.push(...values);
+        this.valuesWereCleaned = false;
         this.notifyListeners();
     }
 
     clear(): void {
         this.values = [];
+        this.valuesWereCleaned = true;
         this.notifyListeners();
     }
 };
 
 
 export {
+    ResultSet,
+    EmptyInputResultSet,
     ISuggestionsContainer,
     ISuggestionsContainerListener,
     DefaultSuggestionsContainer,

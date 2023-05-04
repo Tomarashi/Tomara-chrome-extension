@@ -49,6 +49,18 @@
     display: none;
 }
 
+.tomara-extension-suggestion-box-info-tag {
+    margin: 0;
+    text-align: center;
+    font-style: italic;
+    padding: 10px 11px;
+    display: none;
+}
+
+.tomara-extension-suggestion-box-info-tag-visible {
+    display: block;
+}
+
 .tomara-extension-suggestion-box-list {
     list-style-type: none;
     padding: 0;

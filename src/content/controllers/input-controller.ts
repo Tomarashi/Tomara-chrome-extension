@@ -46,7 +46,7 @@ const setUpController = (elements: HTMLElement[]) => {
             }
             box.setCoordinates(wrapper.getCursorCoordinates());
 
-            const cursorPos = wrapper.getCursurPosition(srcEvent);
+            const cursorPos = wrapper.getCursorPosition(srcEvent);
             const splitted = splitString(wrapper.getValue().substring(0, cursorPos));
             const lastSubstring = splitted.length === 0? "": splitted[splitted.length - 1];
 
@@ -58,18 +58,20 @@ const setUpController = (elements: HTMLElement[]) => {
                 );
             }
 
-            (() => {
-                if(lastSubstring === "") {
-                    return;
-                }
+            if(lastSubstring !== "") {
                 box.registerForUserChoice(component, (choice) => {
                     const value = wrapper.getValue();
                     const newVal = value.substring(0, cursorPos) +
                         choice.substring(lastSubstring.length) +
-                        value.substring(cursorPos);
-                    console.log(newVal);
+                        " " + value.substring(cursorPos);
+                    wrapper.getWrapped().focus();
+                    const newPos = wrapper.getCursorPosition(srcEvent) + lastSubstring.length + 1;
+
+                    wrapper.setValue(newVal);
+                    wrapper.setCursurPosition(newPos);
+                    container.clear();
                 });
-            })();
+            }
         };
 
         wrapper.on("input", inputOrClickEvent);

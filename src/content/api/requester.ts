@@ -12,7 +12,7 @@ class HttpRequester implements IRequester {
 class FakeRequester implements IRequester {
     getWordsStartsWith(subString: string, size: number = undefined): string[] {
         if(!size) {
-            size = 5 + Math.floor(Math.random() * 10);
+            size = Math.floor(Math.random() * 6);
         }
         return new Array(size).fill(subString).map((val, index) => {
             return val + "-" + (index + 1);

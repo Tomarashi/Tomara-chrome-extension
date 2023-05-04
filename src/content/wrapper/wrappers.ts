@@ -3,14 +3,16 @@ import {
     copyStyles,
     getBody,
 } from "../utils/dom-functions.js";
-import { WrapperManager } from "./wrapper-manager";
+import { isArrowKey } from "../utils/keyboard-functions.js";
+import { WrapperManager } from "./wrapper-manager.js";
 
 interface IDomElementWrapper {
     getWrapped(): HTMLElement
     getValue(): string
     setValue(newValue: string): void
     getCursorCoordinates(): Coordinate
-    getCursurPosition(event: Event): number
+    getCursorPosition(event: Event): number
+    setCursurPosition(newPos: number): void
     on(eventType: string | string[], listener: EventListenerOrEventListenerObject): void
 };
 
@@ -35,7 +37,9 @@ abstract class AbstractDomElementWrapper<T extends HTMLElement> implements IDomE
 
     abstract getCursorCoordinates(): Coordinate
 
-    abstract getCursurPosition(event: Event): number
+    abstract getCursorPosition(event: Event): number
+
+    abstract setCursurPosition(newPos: number): void
 
     on(eventType: string | string[], listener: EventListenerOrEventListenerObject): void {
         if(Array.isArray(eventType)) {
@@ -52,13 +56,38 @@ abstract class AbstractDomElementWrapper<T extends HTMLElement> implements IDomE
 };
 
 class DivWrapper extends AbstractDomElementWrapper<HTMLDivElement> {
+    private lastCursorPosition: number;
+
+    constructor(
+        domElement: HTMLDivElement, wrapperManager: WrapperManager = null,
+    ) {
+        super(domElement, wrapperManager);
+        this.lastCursorPosition = 0;
+        const updateCursorPositionFunc = () => {
+            this.lastCursorPosition = this.getCursorPositionInner();
+        };
+        this.domElement.addEventListener("input", updateCursorPositionFunc);
+        this.domElement.addEventListener("click", updateCursorPositionFunc);
+        this.domElement.addEventListener("keyup", (keyEvent: KeyboardEvent) => {
+            if(isArrowKey(keyEvent.keyCode)) {
+                this.lastCursorPosition = this.getCursorPositionInner();
+            }
+        });
+    }
+
+    private getCursorPositionInner(): number {
+        const range = document.getSelection().getRangeAt(0);
+        return range.endOffset || range.startOffset;
+    }
+
     getValue(): string {
         const element = this.domElement;
-        return (element.textContent || element.innerHTML).replace(/ +/g," ");
+        return element.textContent || element.innerHTML;
     }
 
     setValue(newValue: string): void {
         const element = this.domElement;
+        newValue = newValue.replace(/ /g, "\u00A0");
         if(element.textContent) {
             element.textContent = newValue;
         } else if(element.innerHTML) {
@@ -77,8 +106,24 @@ class DivWrapper extends AbstractDomElementWrapper<HTMLDivElement> {
         return new Coordinate(rect.x, rect.y);
     }
 
-    getCursurPosition(_: Event): number {
-        return document.getSelection().getRangeAt(0).endOffset;
+    getCursorPosition(_: Event): number {
+        return this.lastCursorPosition;
+    }
+
+    setCursurPosition(newPos: number): void {
+        const range = document.createRange();
+        const selection = window.getSelection();
+
+        try {
+            range.setStart(this.domElement.childNodes[0], newPos);
+        } catch(_) {
+            newPos = this.domElement.childNodes[0].textContent.length;
+            range.setStart(this.domElement.childNodes[0], newPos);
+        }
+        range.collapse(true);
+
+        selection.removeAllRanges();
+        selection.addRange(range);
     }
 };
 
@@ -115,8 +160,12 @@ class InputWrapper extends AbstractDomElementWrapper<HTMLInputElement> {
         );
     }
 
-    getCursurPosition(event: Event): number {
+    getCursorPosition(event: Event): number {
         return (event.target as any).selectionStart;
+    }
+
+    setCursurPosition(newPos: number): void {
+        this.domElement.setSelectionRange(newPos, newPos);
     }
 };
 
@@ -180,8 +229,12 @@ class TextareaWrapper extends AbstractDomElementWrapper<HTMLTextAreaElement> {
         );
     }
 
-    getCursurPosition(event: Event): number {
+    getCursorPosition(event: Event): number {
         return (event.target as any).selectionStart;
+    }
+
+    setCursurPosition(newPos: number): void {
+        this.domElement.setSelectionRange(newPos, newPos);
     }
 };
 
