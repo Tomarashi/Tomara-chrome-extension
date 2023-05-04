@@ -1,5 +1,6 @@
 import { setUpController } from "./controllers/input-controller.js";
 import { loadDomComponents } from "./utils/dom-functions.js";
+import config from "./config.js";
 
 const main = function() {
     const selectors = [
@@ -10,7 +11,7 @@ const main = function() {
     const textInputElements = loadDomComponents(...selectors).map(elemenet => {
         return elemenet as HTMLElement;
     });
-    setUpController(textInputElements);
+    setUpController(textInputElements, config);
 };
 
 (function() {

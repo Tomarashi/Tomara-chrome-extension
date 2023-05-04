@@ -30,6 +30,7 @@
         "dist/content/utils/const.js",
         "dist/content/utils/dom-functions.js",
         "dist/content/utils/keyboard-functions.js",
+        "dist/content/utils/log-functions.js",
         "dist/content/utils/string-functions.js",
         "dist/content/wrapper/exceptions.js",
         "dist/content/wrapper/functions.js",

@@ -1,23 +1,32 @@
-import { IRequester, FakeRequester } from "../api/requester.js";
+import { IRequester, HttpRequester } from "../api/requester.js";
+import { Tomaraconfiguration } from "../config";
 import { ISuggestionsBox, DefaultSuggestionsBox } from "../ui/suggestions-box.js";
 import { ISuggestionsContainer, DefaultSuggestionsContainer } from "../ui/suggestions-container.js";
 import { isLeftRightArrowKey, isUpDownArrowKey } from "../utils/keyboard-functions.js";
+import { warning } from "../utils/log-functions.js";
 import { splitString } from "../utils/string-functions.js";
 import { createDomElementWrapper } from "../wrapper/functions.js";
 import { WrapperManager } from "../wrapper/wrapper-manager.js";
 
-const setUpController = (elements: HTMLElement[]) => {
+const setUpController = async (
+    elements: HTMLElement[], config: Tomaraconfiguration,
+) => {
     const elementsSet = new Set(elements);
 
     const container: ISuggestionsContainer = new DefaultSuggestionsContainer();
     const wrapperManager = new WrapperManager();
     const box: ISuggestionsBox = new DefaultSuggestionsBox(container, wrapperManager);
-    const requester: IRequester = new FakeRequester();
+    const requester: IRequester = new HttpRequester(config);
+
+    if(!(await requester.check())) {
+        warning("Can't find remote server");
+        return;
+    }
 
     elements.forEach((component) => {
         const wrapper = createDomElementWrapper(component);
 
-        const inputOrClickEvent = (srcEvent) => {
+        const inputOrClickEvent = async (srcEvent) => {
             const hideBoxEvent = (newEvent) => {
                 const newTarget = newEvent.target;
                 if(srcEvent !== newEvent
@@ -53,9 +62,8 @@ const setUpController = (elements: HTMLElement[]) => {
             if(lastSubstring === "") {
                 container.clear();
             } else {
-                container.updateValues(
-                    ...requester.getWordsStartsWith(lastSubstring, undefined),
-                );
+                const result = await requester.getWordsStartsWith(lastSubstring, undefined);
+                container.updateValues(...result);
             }
 
             if(lastSubstring !== "") {
