@@ -64,7 +64,7 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
                 const item = document.createElement("li");
                 item.innerHTML = value;
                 item.setAttribute("class", DefaultSuggestionsBox.MAIN_LIST_ITEM_CLASS_NAME);
-                item.addEventListener("click", (pointerEvent: PointerEvent) => {
+                item.addEventListener("click", (_: PointerEvent) => {
                     const owner = this.owner;
                     const wrapper = owner.wrapperManager.getFocused();
                     const func = owner.userChoiseEventsMap.get(wrapper.getWrapped());
@@ -94,9 +94,10 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
             return 0 <= index && index < this.values.length;
         }
 
-        chooseOffset(listOffset: number) {
+        chooseOffset(listOffset: number): boolean {
             const newCurrIndex = this.currIndex + listOffset;
-            if(this.indexInRange(newCurrIndex)) {
+            const inRange = this.indexInRange(newCurrIndex);
+            if(inRange) {
                 if(this.indexInRange(this.currIndex)) {
                     this.items[this.currIndex].classList.remove(
                         DefaultSuggestionsBox.MAIN_LIST_ITEM_CHOSEN_CLASS_NAME,
@@ -107,17 +108,12 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
                 );
                 this.currIndex = newCurrIndex;
                 this.owner.root.scroll({top: 0});
-                /*const parentRect = this.owner.root.getBoundingClientRect();
-                const listItem = this.items[this.currIndex].getBoundingClientRect();
-                const listItemTop = listItem.top - parentRect.top;
-                const listItemBottom = listItemTop + listItem.height;
-
-                if(listItemTop < 0) {
-                    this.owner.root.scroll({top: listItemBottom});
-                } else if(listItemBottom > this.owner.getHeight()) {
-                    this.owner.root.scroll({top: listItemTop});
-                }*/
             }
+            return inRange;
+        }
+
+        getCurrentItem(): HTMLLIElement {
+            return this.items[this.currIndex];
         }
     };
 
@@ -171,8 +167,15 @@ class DefaultSuggestionsBox implements ISuggestionsBox, ISuggestionsContainerLis
                 keyEvent.preventDefault();
             } else if(keyEvent.ctrlKey && isUpDownArrowKey(keyCode)) {
                 const offset = (keyCode == UP_ARROW_KEY_CODE)? -1: 1;
-                this.listHolder.chooseOffset(offset);
-                keyEvent.preventDefault();
+                const changed = this.listHolder.chooseOffset(offset);
+
+                if(changed) {
+                    const item = this.listHolder.getCurrentItem();
+                    const rootBRect = this.root.getBoundingClientRect();
+                    const itemBRect = item.getBoundingClientRect();
+                    this.root.scrollTop = Math.round(itemBRect.y - rootBRect.y);
+                    keyEvent.preventDefault();
+                }
             }
         });
     }

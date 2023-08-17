@@ -1,4 +1,5 @@
 import { TomaraConfiguration } from "../config.js";
+import { FAKE_DATABASE } from "./fake-dataset.js";
 
 class GetWordsResult {
     private readonly result: string[];
@@ -86,13 +87,11 @@ class FakeRequester implements IRequester {
     }
 
     getWordsStartWith(subString: string, size: number, requestId?: string): Promise<GetWordsResult> {
-        if(!size) {
-            size = Math.floor(Math.random() * 6);
-        }
+        if(size < 1) size = 1;
         return new Promise((resolve, _) => {
-            const arr = new Array(size).fill(subString).map((val, index) => {
-                return val + "-" + (index + 1);
-            });
+            const arr = FAKE_DATABASE.filter(val => {
+                return val.startsWith(subString);
+            }).slice(0, size);
             resolve(new GetWordsResult(arr, requestId));
         });
     }

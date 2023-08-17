@@ -22,6 +22,7 @@
       "resources": [
         "dist/content/config.js",
         "dist/content/index.js",
+        "dist/content/api/fake-dataset.js",
         "dist/content/api/requester.js",
         "dist/content/controllers/input-controller.js",
         "dist/content/ui/suggestions-box.js",
