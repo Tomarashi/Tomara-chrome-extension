@@ -1,12 +1,12 @@
 # Tomara-chrome-extension
 Tomara's Extension
 
-To compile project run:
+To compile project, run:
 ```sh
 npm run build
 ```
 
-To build into separate directory:
+To build into separate directory (`tomara-extension`):
 ```sh
 node build.js
 ```

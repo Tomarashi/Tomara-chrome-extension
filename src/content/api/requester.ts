@@ -1,63 +1,81 @@
-import { Tomaraconfiguration } from "../config.js";
-import { log } from "../utils/log-functions.js";
+import { TomaraConfiguration } from "../config.js";
+
+class GetWordsResult {
+    private readonly result: string[];
+    private readonly requestId: string;
+
+    constructor(result: string[], requestId?: string) {
+        this.result = result;
+        this.requestId = requestId || "";
+    }
+
+    getResult(): string[] {
+        return this.result;
+    }
+
+    getRequestId(): string {
+        return this.requestId;
+    }
+
+    isRequestId(): boolean {
+        return this.requestId !== undefined
+            && this.requestId !== null
+            && this.requestId !== "";
+    }
+}
 
 interface IRequester {
     check(): Promise<boolean>
-    getWordsStartsWith(subString: string, size: number): Promise<string[]>
+    getWordsStartWith(subString: string, size: number, requestId?: string): Promise<GetWordsResult>
 };
 
 class HttpRequester implements IRequester {
     static readonly DEFAULT_SIZE = 8;
 
-    private config: Tomaraconfiguration;
-    private totalResult: number;
-    private totalTimeNs: number;
+    private config: TomaraConfiguration;
 
-    constructor(config: Tomaraconfiguration) {
+    constructor(config: TomaraConfiguration) {
         this.config = config;
-        this.totalResult = 0;
-        this.totalTimeNs = 0;
     }
 
     async check(): Promise<boolean> {
         const url = this.config.host + this.config.test_path;
         try {
-            const response = await fetch(url).then((response) => {
-                if(response.status !== 200) {
-                    throw new Error();
-                }
-                return true;
-            }).then((data) => {
-                return data;
-            }).catch(() => {
-                return false;
-            });
+            const response = await fetch(url)
+                .then((response) => {
+                    if(response.status !== 200) {
+                        throw new Error();
+                    }
+                    return true;
+                }).then((data) => {
+                    return data;
+                }).catch(() => {
+                    return false;
+                });
             return response;
         } catch(_) {
             return false;
         }
     }
 
-    async getWordsStartsWith(subString: string, size: number): Promise<string[]> {
+    async getWordsStartWith(subString: string, size: number, requestId?: string): Promise<GetWordsResult> {
         size = size || HttpRequester.DEFAULT_SIZE;
-        const url = new URL(this.config.host + this.config.api_path);
-        url.searchParams.set(this.config.word_param, subString);
-        url.searchParams.set(this.config.size_param, size.toFixed());
+        const config = this.config;
+        const url = new URL(config.host + config.api_path);
+        url.searchParams.set(config.word_param, subString);
+        url.searchParams.set(config.size_param, size.toFixed());
+        if(requestId) {
+            url.searchParams.set(config.request_id_param, requestId);
+        }
 
         try {
             const response = await fetch(url.toString());
             const result = await response.json();
             const words = result["words"] || [];
-            if(words.length > 0) {
-                this.totalResult += 1;
-                this.totalTimeNs += result["taken_ns"] || 0;
-                if(this.totalResult > 0 && this.totalResult % 1000 === 0) {
-                    log(`Average Time: ${this.totalTimeNs / this.totalResult} ns.`);
-                }
-            }
-            return words;
+            const requestId = result["request_id"];
+            return new GetWordsResult(words, requestId);
         } catch(_) {
-            return [];
+            return new GetWordsResult([]);
         }
     }
 };
@@ -67,7 +85,7 @@ class FakeRequester implements IRequester {
         return true;
     }
 
-    getWordsStartsWith(subString: string, size: number = undefined): Promise<string[]> {
+    getWordsStartWith(subString: string, size: number, requestId?: string): Promise<GetWordsResult> {
         if(!size) {
             size = Math.floor(Math.random() * 6);
         }
@@ -75,7 +93,7 @@ class FakeRequester implements IRequester {
             const arr = new Array(size).fill(subString).map((val, index) => {
                 return val + "-" + (index + 1);
             });
-            resolve(arr);
+            resolve(new GetWordsResult(arr, requestId));
         });
     }
 };

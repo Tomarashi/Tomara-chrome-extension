@@ -1,15 +1,15 @@
 import { IRequester, HttpRequester } from "../api/requester.js";
-import { Tomaraconfiguration } from "../config";
+import { TomaraConfiguration } from "../config";
 import { ISuggestionsBox, DefaultSuggestionsBox } from "../ui/suggestions-box.js";
 import { ISuggestionsContainer, DefaultSuggestionsContainer } from "../ui/suggestions-container.js";
 import { isLeftRightArrowKey, isUpDownArrowKey } from "../utils/keyboard-functions.js";
-import { warning } from "../utils/log-functions.js";
-import { splitString } from "../utils/string-functions.js";
+import { warning, log } from "../utils/log-functions.js";
+import { isGeorgianWithPunct } from "../utils/string-functions.js";
 import { createDomElementWrapper } from "../wrapper/functions.js";
 import { WrapperManager } from "../wrapper/wrapper-manager.js";
 
 const setUpController = async (
-    elements: HTMLElement[], config: Tomaraconfiguration,
+    elements: HTMLElement[], config: TomaraConfiguration,
 ) => {
     const elementsSet = new Set(elements);
 
@@ -18,7 +18,9 @@ const setUpController = async (
     const box: ISuggestionsBox = new DefaultSuggestionsBox(container, wrapperManager);
     const requester: IRequester = new HttpRequester(config);
 
-    if(!(await requester.check())) {
+    if(await requester.check()) {
+        log("Remote server is found!");
+    } else {
         warning("Can't find remote server");
         return;
     }
@@ -56,24 +58,23 @@ const setUpController = async (
             box.setCoordinates(wrapper.getCursorCoordinates());
 
             const cursorPos = wrapper.getCursorPosition(srcEvent);
-            const splitted = splitString(wrapper.getValue().substring(0, cursorPos));
-            const lastSubstring = splitted.length === 0? "": splitted[splitted.length - 1];
+            const lastToken = wrapper.getLastToken(srcEvent);
 
-            if(lastSubstring === "") {
+            if(lastToken === "" || !isGeorgianWithPunct(lastToken)) {
                 container.clear();
             } else {
-                const result = await requester.getWordsStartsWith(lastSubstring, undefined);
-                container.updateValues(...result);
+                const result = await requester.getWordsStartWith(lastToken, HttpRequester.DEFAULT_SIZE);
+                container.updateValues(...result.getResult());
             }
 
-            if(lastSubstring !== "") {
+            if(lastToken !== "") {
                 box.registerForUserChoice(component, (choice) => {
                     const value = wrapper.getValue();
                     const newVal = value.substring(0, cursorPos) +
-                        choice.substring(lastSubstring.length) +
+                        choice.substring(lastToken.length) +
                         " " + value.substring(cursorPos);
                     wrapper.getWrapped().focus();
-                    const newPos = wrapper.getCursorPosition(srcEvent) + lastSubstring.length + 1;
+                    const newPos = wrapper.getCursorPosition(srcEvent) + lastToken.length + 1;
 
                     wrapper.setValue(newVal);
                     wrapper.setCursurPosition(newPos);

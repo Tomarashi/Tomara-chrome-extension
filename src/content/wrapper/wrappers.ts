@@ -4,11 +4,13 @@ import {
     getBody,
 } from "../utils/dom-functions.js";
 import { isArrowKey } from "../utils/keyboard-functions.js";
+import { splitString } from "../utils/string-functions.js";
 import { WrapperManager } from "./wrapper-manager.js";
 
 interface IDomElementWrapper {
     getWrapped(): HTMLElement
     getValue(): string
+    getLastToken(event: Event): string
     setValue(newValue: string): void
     getCursorCoordinates(): Coordinate
     getCursorPosition(event: Event): number
@@ -32,6 +34,12 @@ abstract class AbstractDomElementWrapper<T extends HTMLElement> implements IDomE
     }
 
     abstract getValue(): string
+
+    getLastToken(event: Event): string {
+        const cursorPos = this.getCursorPosition(event);
+        const splitted = splitString(this.getValue().substring(0, cursorPos));
+        return splitted.length === 0? "": splitted[splitted.length - 1];
+    }
 
     abstract setValue(newValue: string): void
 

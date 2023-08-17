@@ -7,7 +7,7 @@ import {
 } from "./wrappers.js";
 
 const createDomElementWrapper = (domElement: HTMLElement): IDomElementWrapper => {
-    const tagName = domElement.tagName.toLocaleLowerCase();
+    const tagName = domElement.tagName.toLowerCase();
     if(tagName === "input") {
         return new InputWrapper(domElement as HTMLInputElement);
     } else if(tagName === "div") {

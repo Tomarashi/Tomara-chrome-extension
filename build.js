@@ -135,6 +135,8 @@ const process = (manifest, tsConfig) => {
 
     info(`Deleting '${outDir}' Directory...`);
     fs.rmSync(outDir, { recursive: true, force: true });
+
+    info(`Folder '${BUILD_DIR}' is created!`);
 };
 
 (() => {
