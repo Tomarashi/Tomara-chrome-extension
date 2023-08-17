@@ -110,8 +110,12 @@ class DivWrapper extends AbstractDomElementWrapper<HTMLDivElement> {
         const newRange = document.createRange();
         newRange.setStart(startNode, startOffset);
         newRange.setEnd(startNode, startOffset);
+
         const rect = newRange.getBoundingClientRect();
-        return new Coordinate(rect.x, rect.y);
+        return new Coordinate(
+            rect.x + window.scrollX,
+            rect.y + window.scrollY,
+        );
     }
 
     getCursorPosition(_: Event): number {
@@ -162,9 +166,12 @@ class InputWrapper extends AbstractDomElementWrapper<HTMLInputElement> {
         ] = [div, span, input].map(e => e.getBoundingClientRect());
 
         body.removeChild(div);
+
+        const elemX = inputPos.x + spanPos.x - divPos.x;
+        const elemY = inputPos.y + spanPos.y - divPos.y;
         return new Coordinate(
-            inputPos.x + spanPos.x - divPos.x,
-            inputPos.y + spanPos.y - divPos.y,
+            elemX + window.scrollX,
+            elemY + window.scrollY,
         );
     }
 
@@ -231,9 +238,12 @@ class TextareaWrapper extends AbstractDomElementWrapper<HTMLTextAreaElement> {
         const lineHeight = (lines.length - 1) * getLineHeightInPixels(textArea);
 
         body.removeChild(div);
+
+        const elemX = inputPos.x + spanPos.x - divPos.x;
+        const elemY = inputPos.y + spanPos.y - divPos.y + lineHeight;
         return new Coordinate(
-            inputPos.x + spanPos.x - divPos.x,
-            inputPos.y + spanPos.y - divPos.y + lineHeight,
+            elemX + window.scrollX,
+            elemY + window.scrollY,
         );
     }
 
