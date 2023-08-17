@@ -139,6 +139,11 @@ const process = (manifest, tsConfig) => {
 
     writeFile(join(BUILD_DIR, GITIGNORE_FILE), "*\n");
 
+    const convertedFileCount = jsResources.length
+        + cssResources.length
+        + otherResources.length;
+    info("Number of converted files: " + convertedFileCount);
+
     const outDir = getField(tsConfig, "compilerOptions.outDir");
     info(`Deleting '${outDir}' Directory...`);
     fs.rmSync(outDir, { recursive: true, force: true });
