@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Tomarashi/Tomara-chrome-extension#readme",
   "dependencies": {
+    "clean-css": "^5.3.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4",
     "uglify-js": "^3.17.4"

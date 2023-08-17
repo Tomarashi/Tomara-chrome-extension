@@ -3,3 +3,6 @@ node_modules/
 
 # compiled files
 dist/
+
+# output folder
+tomara-extension/
