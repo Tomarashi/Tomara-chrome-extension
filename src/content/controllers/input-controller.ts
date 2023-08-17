@@ -1,7 +1,8 @@
 import { IRequester, HttpRequester } from "../api/requester.js";
 import { TomaraConfiguration } from "../config";
-import { ISuggestionsBox, DefaultSuggestionsBox } from "../ui/suggestions-box.js";
-import { ISuggestionsContainer, DefaultSuggestionsContainer } from "../ui/suggestions-container.js";
+import { DefaultSuggestionsBox } from "../ui/suggestions-box-default.js";
+import { ISuggestionsBox } from "../ui/suggestions-box.js";
+import { ISuggestionsContainer, DefaultSuggestionsContainer, SuggestionsContainerState } from "../ui/suggestions-container.js";
 import { isLeftRightArrowKey, isUpDownArrowKey } from "../utils/keyboard-functions.js";
 import { warning, log } from "../utils/log-functions.js";
 import { isGeorgianWithPunct } from "../utils/string-functions.js";
@@ -63,18 +64,25 @@ const setUpController = async (
             if(lastToken === "" || !isGeorgianWithPunct(lastToken)) {
                 container.clear();
             } else {
+                container.setState(SuggestionsContainerState.SEARCHING);
                 const result = await requester.getWordsStartWith(lastToken, HttpRequester.DEFAULT_SIZE);
                 container.updateValues(...result.getResult());
+                container.setState(SuggestionsContainerState.SHOWING);
             }
 
             if(lastToken !== "") {
                 box.registerForUserChoice(component, (choice) => {
-                    const value = wrapper.getValue();
-                    const newVal = value.substring(0, cursorPos) +
-                        choice.substring(lastToken.length) +
-                        " " + value.substring(cursorPos);
                     wrapper.getWrapped().focus();
-                    const newPos = wrapper.getCursorPosition(srcEvent) + lastToken.length + 1;
+                    const value = wrapper.getValue();
+                    const newVal = (() => {
+                        const valueEnd = value.substring(cursorPos);
+                        return value.substring(0, cursorPos)
+                            + choice.substring(lastToken.length)
+                            + (valueEnd.startsWith(" ")? "": " ")
+                            + valueEnd;
+                    })();
+                    const newPos = wrapper.getCursorPosition(srcEvent)
+                        + choice.length - lastToken.length + 1;
 
                     wrapper.setValue(newVal);
                     wrapper.setCursurPosition(newPos);

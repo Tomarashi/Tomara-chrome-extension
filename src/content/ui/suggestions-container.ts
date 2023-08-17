@@ -1,15 +1,16 @@
 class ResultSet {
-    readonly values: string[]
+    readonly values?: string[]
 
-    constructor(values: string[]) {
+    constructor(values?: string[]) {
         this.values = values;
     }
 };
 
-class EmptyInputResultSet extends ResultSet {
-    constructor() {
-        super(undefined);
-    }
+
+enum SuggestionsContainerState {
+    WAITING,
+    SEARCHING,
+    SHOWING,
 };
 
 
@@ -19,11 +20,13 @@ interface ISuggestionsContainer {
     getValues(): string[]
     addValues(...values: string[]): void
     updateValues(...values: string[]): void
+    getState(): SuggestionsContainerState
+    setState(state: SuggestionsContainerState): void
     clear(): void
 };
 
 interface ISuggestionsContainerListener {
-    updatedContainer(resultSet: ResultSet): void
+    updatedContainer(container: ISuggestionsContainer): void
 };
 
 
@@ -31,11 +34,13 @@ class DefaultSuggestionsContainer implements ISuggestionsContainer {
     private listeners: Set<ISuggestionsContainerListener>;
     private values: string[];
     private valuesWereCleaned: boolean;
+    private state: SuggestionsContainerState;
 
     constructor() {
         this.listeners = new Set();
         this.values = [];
         this.valuesWereCleaned = true;
+        this.state = SuggestionsContainerState.WAITING;
     }
 
     addListener(listener: ISuggestionsContainerListener): boolean {
@@ -55,11 +60,8 @@ class DefaultSuggestionsContainer implements ISuggestionsContainer {
     }
 
     private notifyListeners(): void {
-        const resultSet = (this.valuesWereCleaned)?
-            new EmptyInputResultSet():
-            new ResultSet(this.values);
         this.listeners.forEach((listener) => {
-            listener.updatedContainer(resultSet);
+            listener.updatedContainer(this);
         });
     }
 
@@ -76,9 +78,19 @@ class DefaultSuggestionsContainer implements ISuggestionsContainer {
         this.notifyListeners();
     }
 
+    getState(): SuggestionsContainerState {
+        return this.state;
+    }
+
+    setState(state: SuggestionsContainerState) {
+        this.state = state;
+        this.notifyListeners();
+    }
+
     clear(): void {
         this.values = [];
         this.valuesWereCleaned = true;
+        this.state = SuggestionsContainerState.WAITING;
         this.notifyListeners();
     }
 };
@@ -86,7 +98,7 @@ class DefaultSuggestionsContainer implements ISuggestionsContainer {
 
 export {
     ResultSet,
-    EmptyInputResultSet,
+    SuggestionsContainerState,
     ISuggestionsContainer,
     ISuggestionsContainerListener,
     DefaultSuggestionsContainer,

@@ -25,6 +25,7 @@
         "dist/content/api/fake-dataset.js",
         "dist/content/api/requester.js",
         "dist/content/controllers/input-controller.js",
+        "dist/content/ui/suggestions-box-default.js",
         "dist/content/ui/suggestions-box.js",
         "dist/content/ui/suggestions-container.js",
         "dist/content/utils/classes.js",
