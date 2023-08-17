@@ -1,4 +1,6 @@
-# Tomara-chrome-extension
+# DEPRECATED
+
+## Tomara-chrome-extension
 Tomara's Extension
 
 #### Helper projects:
