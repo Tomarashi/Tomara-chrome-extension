@@ -126,7 +126,14 @@ const process = (manifest, tsConfig) => {
     })();
 
     info("Building...");
-    execSync("npm run build");
+    try {
+        const outBuf = execSync("npm run build");
+        console.log(outBuf.toString());
+    } catch(e) {
+        const stdout = e.stdout.toString();
+        const stderr = e.stderr.toString();
+        throw new Error(`Can't execute build commnad:\n[OUT] ${stdout}\n[ERR] ${stderr}`);
+    }
 
     info("Copying...");
     jsResources.forEach(withLog(
