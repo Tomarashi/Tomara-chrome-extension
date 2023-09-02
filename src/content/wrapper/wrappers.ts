@@ -119,7 +119,15 @@ class DivWrapper extends AbstractDomElementWrapper<HTMLDivElement> {
     }
 
     getCursorPosition(_: Event): number {
-        return this.lastCursorPosition;
+        const selection = window.getSelection();
+        if(selection.rangeCount === 0) {
+            return -1;
+        }
+        const range = selection.getRangeAt(0);
+        const preSelectionRange = range.cloneRange();
+        preSelectionRange.selectNodeContents(this.domElement);
+        preSelectionRange.setEnd(range.startContainer, range.startOffset);
+        return preSelectionRange.toString().length;
     }
 
     setCursurPosition(newPos: number): void {

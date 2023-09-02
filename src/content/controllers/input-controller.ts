@@ -1,4 +1,4 @@
-import { IRequester, HttpRequester } from "../api/requester.js";
+import { IRequester, HttpRequester, FakeRequester } from "../api/requester.js";
 import { TomaraConfiguration } from "../config";
 import { DefaultSuggestionsBox } from "../ui/suggestions-box-default.js";
 import { ISuggestionsBox } from "../ui/suggestions-box.js";
@@ -17,7 +17,7 @@ const setUpController = async (
     const container: ISuggestionsContainer = new DefaultSuggestionsContainer();
     const wrapperManager = new WrapperManager();
     const box: ISuggestionsBox = new DefaultSuggestionsBox(container, wrapperManager);
-    const requester: IRequester = new HttpRequester(config);
+    const requester: IRequester = new FakeRequester();//new HttpRequester(config);
 
     if(await requester.check()) {
         log("Remote server is found!");
@@ -84,7 +84,56 @@ const setUpController = async (
                     const newPos = wrapper.getCursorPosition(srcEvent)
                         + choice.length - lastToken.length + 1;
 
-                    wrapper.setValue(newVal);
+                    /*(() => {
+                        const arr = [];
+                        let lastIndex = 0;
+                        while(true) {
+                            const sIndex = text.indexOf("<", lastIndex);
+                            if(sIndex < 0) break;
+                            const eIndex = text.indexOf(">", sIndex + 1);
+                            lastIndex = eIndex + 1;
+                            // console.log(text.slice(sIndex, eIndex + 1));
+                        }
+                        arr.push(text.slice(lastIndex));
+                        // console.log(arr);
+                    })();*/
+                    /*const selection = window.getSelection();
+                    if (selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        const newText = document.createTextNode(choice.substring(lastToken.length) + " ");
+                        range.insertNode(newText);
+                        range.setStartAfter(newText);
+                        range.collapse(true);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        console.log("Inserted: " + newText.data);
+                    }*/
+                    (() => {
+                        const caretPosition = window.getSelection().getRangeAt(0);
+                        const insertedText = 'Inserted Text ';
+                        const newText = document.createTextNode(insertedText);
+
+                        caretPosition.deleteContents();
+                        caretPosition.insertNode(newText);
+
+                        const newCaretPosition = document.createRange();
+                        newCaretPosition.setStartAfter(newText);
+                        newCaretPosition.collapse(true);
+
+                        const inputEvent = new Event('input', { bubbles: true });
+                        component.dispatchEvent(inputEvent);
+
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(newCaretPosition);
+
+                        console.log([
+                            caretPosition.startOffset,
+                            caretPosition.endOffset,
+                            insertedText.length,
+                        ]);
+                    })();
+                    // wrapper.setValue(newVal);
                     wrapper.setCursurPosition(newPos);
                     container.clear();
                 });
