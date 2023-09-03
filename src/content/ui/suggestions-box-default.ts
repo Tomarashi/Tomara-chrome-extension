@@ -33,7 +33,7 @@ const MAIN_LIST_CLASS_NAME = "tomara-extension-suggestion-box-list";
 const MAIN_LIST_ITEM_CLASS_NAME = "tomara-extension-suggestion-box-list-item";
 const MAIN_LIST_ITEM_CHOSEN_CLASS_NAME = "tomara-extension-suggestion-box-list-item-chosen";
 
-const INFO_TAG_TEXT_START_TYPE = "დაიწყე აკრიფე...";
+const INFO_TAG_TEXT_START_TYPE = "დაიწყე კრეფა...";
 const INFO_TAG_TEXT_SEARCHING = "იძებნება...";
 const INFO_TAG_TEXT_NO_RESULT = "შედეგი ვერ მოიძებნა ;(";
 
